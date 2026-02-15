@@ -118,8 +118,6 @@ export const updateQuantity = async (req: Request, res: Response) => {
     if (!item) {
       return res.status(404).json({ message: "Item not found in cart" });
     }
-
-    // If quantity <= 0 → remove item
     if (data.quantity <= 0) {
       cart.items = cart.items.filter(
         (i) => i.product.toString() !== data.id
