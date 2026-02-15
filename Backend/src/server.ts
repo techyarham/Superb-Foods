@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ 
   origin: "http://localhost:8080", 
-  credentials: true  // THIS IS CRITICAL for cookies
+  credentials: true  
 }));
 app.use(helmet());
 app.use(logger);
