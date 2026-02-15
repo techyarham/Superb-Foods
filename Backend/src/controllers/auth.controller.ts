@@ -4,15 +4,13 @@ import { verifyPass } from "../utils/bcrypt";
 import { generateToken, generateRefreshToken, Payload, verifyRefreshToken } from "../utils/jwt";
 import { sendEmail } from "../utils/email";
 import { verifyEmail, loginAlertEmail } from "../templates/email.template";
-
+//Login User
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email, isActive: true }).select("+password");
     if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Email verification check
     if (!user.isVerified) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
@@ -28,17 +26,11 @@ export const loginUser = async (req: Request, res: Response) => {
 
       return res.status(401).json({ message: "Email not verified, OTP sent" });
     }
-
-    // Password check
     const isValid = await verifyPass(password, user.password!);
     if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
-
-    // JWT + Refresh token
     const payload: Payload = { id: user.id, email: user.email, role: user.role };
     const token = generateToken(payload);
     const refreshToken = generateRefreshToken(payload);
-
-    // Set both tokens as HTTP-only cookies with path="/"
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -54,8 +46,6 @@ export const loginUser = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
-
-    // Send login alert (non-blocking)
     await sendEmail({
       to: user.email,
       html: loginAlertEmail({
@@ -85,8 +75,6 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const payload = verifyRefreshToken(refreshToken);
     const newToken = generateToken({ id: payload.id, email: payload.email, role: payload.role });
-
-    // Set new token as cookie with same options
     res.cookie("token", newToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
