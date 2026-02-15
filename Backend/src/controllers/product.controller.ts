@@ -19,11 +19,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
       limit = "10",
       sort,
     } = req.query;
-
-    // Always only show active products
     const query: any = { isActive: true };
-
-    // Search across name, description, and category (case‑insensitive)
     if (search && typeof search === "string" && search.trim()) {
       query.$or = [
         { name: { $regex: search.trim(), $options: "i" } },
@@ -31,13 +27,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
         { category: { $regex: search.trim(), $options: "i" } },
       ];
     }
-
-    // Category filter (exact match, case‑insensitive)
     if (category && typeof category === "string" && category.trim()) {
       query.category = { $regex: `^${category.trim()}$`, $options: "i" };
     }
-
-    // Price range
     if (minPrice !== undefined || maxPrice !== undefined) {
       query.price = {};
       if (minPrice !== undefined && !isNaN(Number(minPrice))) {
@@ -47,13 +39,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
         query.price.$lte = Number(maxPrice);
       }
     }
-
-    // Pagination
     const pageNumber = Math.max(1, Number(page) || 1);
     const limitNumber = Math.max(1, Number(limit) || 10);
     const skip = (pageNumber - 1) * limitNumber;
-
-    // Sorting
     let sortOption: any = { createdAt: -1 };
     if (sort === "price_asc") {
       sortOption = { price: 1 };
