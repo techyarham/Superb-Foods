@@ -88,7 +88,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-// Get single user by id (admin only)
+// Get user by id (admin only)
 export const getUserById = async (req: Request, res: Response) => {
   try {
     if (req.user?.role !== "admin") {
