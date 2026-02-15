@@ -32,8 +32,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/auth", authRoutes);
-
-// Error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ message: "Internal Server Error" });
